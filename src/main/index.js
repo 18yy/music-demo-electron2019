@@ -14,13 +14,10 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
-// 自定义菜单
-let template = [
-    {
-      label:'主页'
-    }
-  ]
+
 function createWindow () {
+  　// 隐藏菜单栏
+  Menu.setApplicationMenu(null)
   /**
    * Initial window options
    */
@@ -34,11 +31,10 @@ function createWindow () {
 
   mainWindow.on('closed', () => {
     mainWindow = null
-  })
+  })  
+
  
-  //增加自定义菜单
-  let menu = Menu.buildFromTemplate(template)
-  Menu.setApplicationMenu(menu)
+ 
 }
 
 app.on('ready', createWindow)

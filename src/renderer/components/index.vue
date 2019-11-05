@@ -1,7 +1,7 @@
 <template>
   <div id="wrapper">
-    <!-- <listsPage :playlists="playlists"></listsPage> -->
-    <listDetail></listDetail>
+    <listsPage :playlists="playlists"></listsPage>
+    <!-- <listDetail></listDetail> -->
     
     <playBar></playBar>
   </div>
