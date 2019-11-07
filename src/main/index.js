@@ -1,5 +1,4 @@
-import { app, BrowserWindow } from 'electron'
-import { Menu } from 'electron'
+const { Menu, app, BrowserWindow } = require('electron');
 require('./NeteaseCloudMusicApi/app')
 /**
  * Set `__static` path to static files in production
@@ -10,13 +9,14 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
-const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
+// const winURL = process.env.NODE_ENV === 'development'
+//   ? `http://localhost:9080`
+//   : `file://${__dirname}/index.html`
+const winURL = 'http://localhost:9080';
 
 
-function createWindow () {
-  　// 隐藏菜单栏
+function createWindow() {
+  // 隐藏菜单栏
   Menu.setApplicationMenu(null)
   /**
    * Initial window options
@@ -31,10 +31,10 @@ function createWindow () {
 
   mainWindow.on('closed', () => {
     mainWindow = null
-  })  
+  })
 
- 
- 
+
+
 }
 
 app.on('ready', createWindow)
