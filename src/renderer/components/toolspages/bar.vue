@@ -1,20 +1,20 @@
 <template>
   <div id="bar">
-    
     <div class="musicDetail" v-if="musicQueue.length>0">
-      <!-- 默认样式？TODO -->
-      <img :src="musicQueue[curIndx].al.picUrl" class="musicPic" />
-      <div class="detailBox">
-        <p class="musicNameBox">
-          <span class="musicName">{{musicQueue[curIndx].name}}</span>
-          <span>-</span>
-          <span>{{musicQueue[curIndx].singer}}</span>
-        </p>
+      <router-link  :to="{ path: '/musicDetail' }">
+        <img :src="musicQueue[curIndx].al.picUrl" class="musicPic" />
+        <div class="detailBox">
+          <p class="musicNameBox">
+            <span class="musicName">{{musicQueue[curIndx].name}}</span>
+            <span>-</span>
+            <span>{{musicQueue[curIndx].singer}}</span>
+          </p>
 
-        <div
-          class="musicTime"
-        >{{ curtime|secondToDate }}/{{ musicQueue[curIndx].dt|millisecondToDate }}</div>
-      </div>
+          <div
+            class="musicTime"
+          >{{ curtime|secondToDate }}/{{ musicQueue[curIndx].dt|millisecondToDate }}</div>
+        </div>
+      </router-link>
     </div>
     <div class="musicDetail" v-else>
       <div class="musicPic"></div>
