@@ -8,7 +8,7 @@
         <td style="width:10%">时长</td>
       </tr>
       <tr v-for="item in musicListData" :key="item.id" @dblclick="playMusic(item)">
-        <td>{{ item.name }}</td>
+        <td :class="{'red':musicQueue[curIndx]&&item.id==musicQueue[curIndx].id?true:false}">{{ item.name }}</td>
         <td>{{ item.singer }}</td>
         <td>{{ item.al.name }}</td>
         <td>{{ item.dt |millisecondToDate }}</td>
@@ -18,32 +18,27 @@
 </template>
 
   <script>
-import { MillisecondToDate } from "../../util/MillisecondToDate ";
+import { timeToDate } from "../../util/timeToDate";
 export default {
   name: "",
   data() {
     return {
-      musicListData: null,
-      curIdx: 0,
-      curId: 0,
-      songObj: null
+      listID: 0, //榜单id
+      musicListData: [] //榜单里的音乐集合
     };
   },
   filters: {
     millisecondToDate(time) {
-      return MillisecondToDate(time);
+      return timeToDate(false, time);
     }
   },
   created() {
-    console.log(this.$route.query);
-    let musicId = this.$route.query.id;
+    this.listID = this.$route.query.id;
     this.$axios({
       method: "get",
-      url: "http://localhost:3000/playlist/detail?id=" + musicId
+      url: "http://localhost:3000/playlist/detail?id=" + this.listID
     })
       .then(response => {
-        console.log("榜单");
-        console.log(response.data.playlist);
         this.musicListData = response.data.playlist.tracks;
         this.musicListData.forEach(function(value, key) {
           value.singer = "";
@@ -59,14 +54,30 @@ export default {
   },
   methods: {
     playMusic(item) {
+      // TODO
       console.log("点击");
+      console.log("当前点击是列表的第几首" + this.musicListData.indexOf(item));
       console.log(item);
-      console.log(this.$store.state.Music.musicQueue);
-      this.$store.commit("addMusicQueue", item);
+      let musicObj = {
+        listID: this.listID,
+        lists: this.musicListData,
+        nowID: this.musicListData.indexOf(item)
+      };
+      this.$store.commit("addMusicQueue", musicObj);
       this.$store.dispatch("getUrl");
       console.log(this.$store.state.Music.musicQueue);
     }
-  }
+  },
+   computed: {
+      curIndx() {
+      return this.$store.state.Music.curIndx;
+    },
+     musicQueue() {
+      console.log("获取state里的队列");
+      console.log(this.$store.state.Music);
+      return this.$store.state.Music.musicQueue;
+    }
+   }
 };
 </script>
 
@@ -99,6 +110,9 @@ table td {
 .headtr td {
   padding: 13px 10px;
   font-weight: bolder;
-  background: rgb(250,250,250)
+  background: rgb(250, 250, 250);
+}
+.red{
+  color: red;
 }
 </style>

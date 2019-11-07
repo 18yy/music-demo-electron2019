@@ -15,19 +15,19 @@ export default new Router({
       meta: { title: '主页' },
       component: require('@/components/index').default,
       redirect: '/list',
-      children:[{
+      children: [{
         path: 'list',
         name: 'list-page',
         component: List,
         meta: { title: '主页' }
-      },{
+      }, {
         path: 'listDetail',
         name: 'listDetail-page',
         component: ListDetail,
         meta: {
           title: '榜单详情'
         }
-      },{
+      }, {
         path: 'musicDetail',
         name: 'musicDetail-page',
         component: MusicDetail,
