@@ -1,5 +1,6 @@
 <template>
   <div id="bar">
+    
     <div class="musicDetail" v-if="musicQueue.length>0">
       <!-- 默认样式？TODO -->
       <img :src="musicQueue[curIndx].al.picUrl" class="musicPic" />
