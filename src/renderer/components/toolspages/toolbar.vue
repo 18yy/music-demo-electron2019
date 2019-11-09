@@ -19,9 +19,7 @@ export default {
      * 生成面包屑的方法
      */
     getBreadcrumb() {
-      console.log("jaishi");
       let matched = this.$route.matched.filter(item => item.name);
-      console.log(matched[0]);
       const first = matched[0];
       if (
         first &&
@@ -31,7 +29,6 @@ export default {
         matched = [{ path: "/", meta: { title: "主页" } }].concat(matched);
       }
       this.levelList = matched;
-      console.log(matched);
     }
   },
   mounted() {
@@ -47,6 +44,12 @@ export default {
 
 <style  scoped>
 .toolbar {
-  padding: 18px 0 0 48px;
+  padding: 18px 0 10px 48px;
+  box-sizing: border-box;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: white;
+  width: 100%;
 }
 </style>

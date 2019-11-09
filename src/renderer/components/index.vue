@@ -1,9 +1,6 @@
 <template>
   <div id="wrapper">
     <toolBar></toolBar>
-    <!-- <listsPage :playlists="playlists"></listsPage> -->
-    <!-- <listDetail></listDetail> -->
-    <!-- <musicDetail></musicDetail> -->
     <router-view></router-view>
     <playBar></playBar>
   </div>
@@ -35,6 +32,6 @@ export default {
 <style scoped>
 #wrapper {
   height: 100vh;
-  width: 100vw;
+  width: 98vw;
 }
 </style>

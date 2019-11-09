@@ -1,20 +1,18 @@
 <template>
   <div id="bar">
-    <div class="musicDetail" v-if="musicQueue.length>0">
-      <router-link  :to="{ path: '/musicDetail' }">
-        <img :src="musicQueue[curIndx].al.picUrl" class="musicPic" />
-        <div class="detailBox">
-          <p class="musicNameBox">
-            <span class="musicName">{{musicQueue[curIndx].name}}</span>
-            <span>-</span>
-            <span>{{musicQueue[curIndx].singer}}</span>
-          </p>
+    <div class="musicDetail" v-if="musicQueue.length>0" @dblclick="toMusicDetail">
+      <img :src="musicQueue[curIndx].al.picUrl" class="musicPic" />
+      <div class="detailBox">
+        <p class="musicNameBox">
+          <span class="musicName">{{musicQueue[curIndx].name}}</span>
+          <span>-</span>
+          <span>{{musicQueue[curIndx].singer}}</span>
+        </p>
 
-          <div
-            class="musicTime"
-          >{{ curtime|secondToDate }}/{{ musicQueue[curIndx].dt|millisecondToDate }}</div>
-        </div>
-      </router-link>
+        <div
+          class="musicTime"
+        >{{ curtime|secondToDate }}/{{ musicQueue[curIndx].dt|millisecondToDate }}</div>
+      </div>
     </div>
     <div class="musicDetail" v-else>
       <div class="musicPic"></div>
@@ -25,7 +23,11 @@
     </div>
     <div class="musicControl">
       <button class="lastBtn" @click="pre">上一首</button>
-      <button class="playBtn" @click="playMusic">play</button>
+      <button class="playBtn" @click="playMusic">
+        play
+        <!-- <p v-if="isPlay">pause</p>
+        <p v-else>play</p>-->
+      </button>
       <button class="nextBtn" @click="next">下一首</button>
     </div>
     <div class="volumeControl">
@@ -36,7 +38,7 @@
 </template>
 
 <script>
-import { timeToDate } from "../../util/timeToDate";
+import { timeToDate } from "../../util/util";
 export default {
   name: "bar",
   data() {
@@ -54,7 +56,6 @@ export default {
   },
   methods: {
     playMusic() {
-      console.log("点击按钮");
       this.$store.dispatch("play");
       this.$store.dispatch("getCurTime");
     },
@@ -67,13 +68,17 @@ export default {
       this.$store.dispatch("getUrl");
     },
     changeVolume(val) {
-      this.$store.commit("changeVolume",val);
+      this.$store.commit("changeVolume", val);
+    },
+    toMusicDetail() {
+      this.$store.dispatch("getIyric");
+      this.$router.push({
+        path: "/musicDetail"
+      });
     }
   },
   computed: {
     musicQueue() {
-      console.log("获取state里的队列");
-      console.log(this.$store.state.Music);
       return this.$store.state.Music.musicQueue;
     },
     curIndx() {
@@ -81,8 +86,10 @@ export default {
     },
     curtime() {
       return this.$store.state.Music.curTime;
-    },
-    
+    }
+    // isPlay() {
+    //   return this.$store.state.Music.isPlay;
+    // }
   }
 };
 </script>
@@ -107,7 +114,8 @@ export default {
 .musicDetail {
   display: flex;
   align-items: center;
-  padding-left: 48px;
+  margin-left: 48px;
+  cursor: pointer;
 }
 .musicPic {
   width: 48px;
@@ -143,13 +151,13 @@ export default {
   color: rgb(53, 52, 52);
   cursor: pointer;
 }
-.volumeControl{
-  display: flex
+.volumeControl {
+  display: flex;
 }
 .volumeSlider {
   width: 50%;
 }
-.volumeControl p{
+.volumeControl p {
   line-height: 38px;
   font-size: 14px;
   color: rgb(53, 52, 52);

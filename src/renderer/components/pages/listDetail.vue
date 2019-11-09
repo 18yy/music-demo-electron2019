@@ -8,7 +8,9 @@
         <td style="width:10%">时长</td>
       </tr>
       <tr v-for="item in musicListData" :key="item.id" @dblclick="playMusic(item)">
-        <td :class="{'red':musicQueue[curIndx]&&item.id==musicQueue[curIndx].id?true:false}">{{ item.name }}</td>
+        <td
+          :class="{'red':musicQueue[curIndx]&&item.id==musicQueue[curIndx].id?true:false}"
+        >{{ item.name }}</td>
         <td>{{ item.singer }}</td>
         <td>{{ item.al.name }}</td>
         <td>{{ item.dt |millisecondToDate }}</td>
@@ -18,7 +20,8 @@
 </template>
 
   <script>
-import { timeToDate } from "../../util/timeToDate";
+import { timeToDate } from "../../util/util";
+import { getMusicLists } from "../../server/api";
 export default {
   name: "",
   data() {
@@ -34,30 +37,19 @@ export default {
   },
   created() {
     this.listID = this.$route.query.id;
-    this.$axios({
-      method: "get",
-      url: "http://localhost:3000/playlist/detail?id=" + this.listID
-    })
-      .then(response => {
-        this.musicListData = response.data.playlist.tracks;
-        this.musicListData.forEach(function(value, key) {
-          value.singer = "";
-          value.ar.forEach(function(val, k) {
-            value.singer += val.name + "/";
-          });
-          value.singer = value.singer.substr(0, value.singer.length - 1);
+    getMusicLists((err, res) => {
+      this.musicListData = res.data.playlist.tracks;
+      this.musicListData.forEach(function(value, key) {
+        value.singer = "";
+        value.ar.forEach(function(val, k) {
+          value.singer += val.name + "/";
         });
-      })
-      .catch(error => {
-        console.log(error);
+        value.singer = value.singer.substr(0, value.singer.length - 1);
       });
+    }, this.listID);
   },
   methods: {
     playMusic(item) {
-      // TODO
-      console.log("点击");
-      console.log("当前点击是列表的第几首" + this.musicListData.indexOf(item));
-      console.log(item);
       let musicObj = {
         listID: this.listID,
         lists: this.musicListData,
@@ -65,19 +57,16 @@ export default {
       };
       this.$store.commit("addMusicQueue", musicObj);
       this.$store.dispatch("getUrl");
-      console.log(this.$store.state.Music.musicQueue);
     }
   },
-   computed: {
-      curIndx() {
+  computed: {
+    curIndx() {
       return this.$store.state.Music.curIndx;
     },
-     musicQueue() {
-      console.log("获取state里的队列");
-      console.log(this.$store.state.Music);
+    musicQueue() {
       return this.$store.state.Music.musicQueue;
     }
-   }
+  }
 };
 </script>
 
@@ -85,6 +74,7 @@ export default {
 .listDetailBox {
   padding: 48px 96px 100px 96px;
   width: 100%;
+  box-sizing: border-box
 }
 .listDetailBox table {
   width: 100%;
@@ -112,7 +102,7 @@ table td {
   font-weight: bolder;
   background: rgb(250, 250, 250);
 }
-.red{
+.red {
   color: red;
 }
 </style>

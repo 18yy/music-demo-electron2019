@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import { getLists } from "../../server/api";
 export default {
   name: "lists-page",
   data() {
@@ -21,16 +22,9 @@ export default {
     };
   },
   created() {
-    this.$axios({
-      method: "get",
-      url: "http://localhost:3000/toplist/detail"
-    })
-      .then(response => {
-        this.playlists = response.data.list;
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    getLists((err, res) => {
+      this.playlists = res.data.list;
+    });
   }
 };
 </script>

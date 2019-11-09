@@ -1,12 +1,16 @@
-import axios from 'axios'
+import { getMusicUrl, getMusicIyric } from "../../server/api"
+import { parseLyric } from "../../util/util"
 const state = {
   musicQueue: [], //音乐播放列表
   curListID: 0,//当前的榜单id
   curIndx: 0, //当前播放第几首歌
-  songObj: null,
+  songObj: null, //单曲对象
   allTime: 0, //当前歌曲的总时长
   curTime: 0,//当前播放的时间
-  curVolume: null //当前音量
+  curVolume: null,//当前音量
+  lyricObject: null, //歌词对象
+  lyricIndx: 0, //当前唱到第几句
+  isPlay: false //是否在播歌
 }
 
 
@@ -17,105 +21,114 @@ const mutations = {
     state.musicQueue = cloneMusicObj.lists;
     state.curIndx = cloneMusicObj.nowID;
     state.allTime = state.musicQueue[state.curIndx].dt;
-    console.log('vuex中的总时长');
-    console.log(state.allTime);
-    console.log(state.curTime)
   },
   createSong(state, url) {
-    console.log('一开始的');
     if (state.songObj instanceof Audio) {
-
       state.songObj.pause();
       state.songObj = null;
-
     }
     state.songObj = new Audio(url)
-
   },
-  computeCurTime(state){
-    if(state.songObj.currentTime >= state.allTime){
+  computeCurTime(state) {
+    if (state.songObj.currentTime >= state.allTime) {
       state.curTime = state.allTime;
     }
     state.curTime = state.songObj.currentTime;
   },
-  pre(state){
-    console.log('点击上一首当前是'+state.curIndx);
-    if (state.musicQueue.length == 0 || state.curIndx == 0){
+  pre(state) {
+    if (state.musicQueue.length == 0 || state.curIndx == 0) {
       return
-    } else{
+    } else {
       state.curIndx--;
     }
-   
+
   },
-  next(state){
-      if (state.musicQueue.length == 0 ) return
-      if(state.curIndx == state.musicQueue.length - 1){
-        state.curIndx=0;
-      } else{
-        state.curIndx++
-      }
-      
-  },
-  changeVolume(state,val){
-    if(val){
-      console.log('当前拖动'+val)
-      state.curVolume = val/100;
+  next(state) {
+    if (state.musicQueue.length == 0) return
+    if (state.curIndx == state.musicQueue.length - 1) {
+      state.curIndx = 0;
+    } else {
+      state.curIndx++
     }
-    if(state.curVolume!== null){
+  },
+  changeVolume(state, val) {
+    if (val) {
+      state.curVolume = val / 100;
+    }
+    if (state.curVolume !== null) {
       if (state.songObj instanceof Audio) {
-        state.songObj.volume= state.curVolume
-        console.log('当前音量'+state.songObj.volume)
+        state.songObj.volume = state.curVolume
       }
+    }
+  },
+  createIyricObj(state, lyricObj) {
+    state.lyricObject = lyricObj;
+  },
+  getIyricIdx(state) {
+    let curTimeInt = parseInt(state.curTime);
+    if (state.lyricObject[curTimeInt]) {
+      state.lyricIndx = state.lyricObject[curTimeInt].line;
     }
   }
+  // },
+  // getIsPlay(state){
+  //    if (state.songObj instanceof Audio) {
+  //     state.isPlay = !state.songObj.paused;
+  //    }
+  // }
+
 }
 
 const actions = {
-  getUrl({ dispatch,commit, state }) {
+  getUrl({ dispatch, commit, state }) {
     if (state.musicQueue.length > 0) {
-      axios({
-        method: 'get',
-        url: 'http://localhost:3000/song/url?id=' + state.musicQueue[state.curIndx].id
-      }).then((response) => {
+      getMusicUrl((err, res) => {
         console.log('geturl')
-        console.log(response.data.data[0].url)
-        let curUrl = response.data.data[0].url;
+        console.log(res.data.data[0].url)
+        let curUrl = res.data.data[0].url;
         commit('createSong', curUrl)
         state.songObj.addEventListener('canplay', () => {
           console.log('缓冲完' + curUrl + state.songObj.paused)
           dispatch('play')
-
-        });
-      })
+        })
+      }, state.musicQueue[state.curIndx].id)
     }
   },
-  play({dispatch,commit, state}) {
-    console.log('按play键');
+  play({ dispatch, commit, state }) {
+    // commit('getIsPlay')
     if (state.songObj.paused) {
-      console.log('play')
       state.songObj.play();
       commit('changeVolume');
       dispatch('getCurTime');
       dispatch('endToNext');
+      dispatch('getIyric')
     } else {
-      console.log('paused')
       state.songObj.pause()
     }
   },
-  getCurTime({ commit, state}) {
-    console.log('getcurtime');
-    console.log(state.songObj)
-    if(state.songObj){
-      state.songObj.addEventListener('timeupdate',()=>{
+  getCurTime({ commit, state }) {
+    if (state.songObj) {
+      state.songObj.addEventListener('timeupdate', () => {
         commit('computeCurTime');
+        commit('getIyricIdx')
       })
     }
   },
-  endToNext({ dispatch,commit, state}) {
-    state.songObj.addEventListener('ended',()=>{
+  endToNext({ dispatch, commit, state }) {
+    state.songObj.addEventListener('ended', () => {
       commit('next');
       dispatch('getUrl')
     })
+  },
+  getIyric({ commit, state }) {
+    getMusicIyric((err, res) => {
+      let lyricObj = parseLyric(res.data.lrc.lyric);
+      let line = 0;
+      for (let i in lyricObj) {
+        lyricObj[i].line = line++;
+      }
+      commit('createIyricObj', lyricObj)
+    }, state.musicQueue[state.curIndx].id)
   }
 }
 
