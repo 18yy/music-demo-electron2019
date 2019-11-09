@@ -83,12 +83,9 @@ const actions = {
   getUrl({ dispatch, commit, state }) {
     if (state.musicQueue.length > 0) {
       getMusicUrl((err, res) => {
-        console.log('geturl')
-        console.log(res.data.data[0].url)
         let curUrl = res.data.data[0].url;
         commit('createSong', curUrl)
         state.songObj.addEventListener('canplay', () => {
-          console.log('缓冲完' + curUrl + state.songObj.paused)
           dispatch('play')
         })
       }, state.musicQueue[state.curIndx].id)
